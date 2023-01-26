@@ -26,7 +26,7 @@ export default class UserController {
             }
 
             if (existUser)
-                return res.status(400).json({code: 400, message: "User already exist"});
+                return res.status(409).json({code: 409, message: "User already exist"});
 
             let groupInstance = this.app.groups.get(group);
             if (!groupInstance)
@@ -41,15 +41,14 @@ export default class UserController {
             user.group.registerStudent(0);
             this.app.users.set(user.id, user);
 
+            req.session.user = user;
             return res.status(201).json({
                 code: 201, 
-                message: "Success",
-                userId: user.id, 
-                token: jwt.sign({userId: user.id}, "RANDOM_TOKEN_SECRET", {expiresIn: '24h'})
+                message: "Success"
             });
         }
-
-        return res.render("User/sign");
+        
+        return res.status(405).json({code: 405, message: "Method not allowed"});
     }
 
     public async login(req: Request, res: Response, next: NextFunction) {
@@ -67,15 +66,28 @@ export default class UserController {
             }
 
             if (!user)
-                return res.status(401).json({code: 401, message: "User not found"});
+                return res.status(404).json({code: 404, message: "User not found"});
 
             const checkPass = await bcrypt.compare(password, user.password);
             if (!checkPass)
-                return res.status(401).json({code: 401, message: "Incorrect password"});
+                return res.status(422).json({code: 422, message: "Incorrect password"});
 
-            return res.status(200).json({userId: user.id, token: jwt.sign({userId: user.id}, "RANDOM_TOKEN_SECRET", {expiresIn: '24h'})});
+            req.session.user = user;
+            return res.status(200).json({
+                code: 200, 
+                message: "Success"
+            });
         }
 
-        res.render("User/login");
+        return res.status(405).json({code: 405, message: "Method not allowed"});
+    }
+
+    public async logout(req: Request, res: Response, next: NextFunction) {
+        if (req.session.user) {
+            req.session.user = undefined;
+            return res.status(200).json({code: 200, message: "Success"});
+        } else {
+            return res.status(401).json({code: 401, message: "Unauthorized"});
+        }
     }
 }

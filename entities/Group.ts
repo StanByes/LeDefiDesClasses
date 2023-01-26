@@ -1,12 +1,10 @@
 export default class Group {
-    public groupName: string;
-    public totalPoint: number;
-    public studentCount: number;
+    public name: string;
+    public totalPoint: number = 0;
+    public studentCount: number = 0;
 
-    constructor(groupName: string) {
-        this.groupName = groupName;
-        this.totalPoint = 0;
-        this.studentCount = 0;
+    constructor(name: string) {
+        this.name = name;
     }
 
     public registerStudent(points: number) {

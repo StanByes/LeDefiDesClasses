@@ -38,7 +38,7 @@ export default class UserModel extends BaseModel {
             },
             {
                 key: "class_name",
-                value: user.group.groupName
+                value: user.group.name
             },
             {
                 key: "points",
